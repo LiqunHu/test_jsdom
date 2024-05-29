@@ -5,6 +5,25 @@ let web = fs.readFileSync('./test.html', 'utf-8')
 // let web = `<!DOCTYPE html><p>Hello world</p>`
 // console.log(web)
 
+const re = /<[^>]+>/gi
+let re_result
+let output = ''
+let start = -1
+let end = -1
+while ((re_result = re.exec(web)) !== null) {
+  end = re_result.index
+  // console.log(re_result.index)
+  // console.log(re_result[0].length)
+  output += re_result[0]
+  if (start > 0) {
+    for (let i = 0; i < end - start; i++) {
+      output += '1'
+    }
+  }
+  start = re_result.index + re_result[0].length
+}
+console.log(output)
+
 const dom = new JSDOM(web, { includeNodeLocations: true })
 // let ele = dom.window.document.querySelector('p')
 // console.log(ele)
