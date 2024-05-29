@@ -2,10 +2,10 @@ const fs = require('fs')
 const jsdom = require('jsdom')
 const { JSDOM } = jsdom
 let web = fs.readFileSync('./test.html', 'utf-8')
-// let web = `<!DOCTYPE html><p>Hello world</p>`
+// let web = `<!-- <111></111>--><!DOCTYPE html><p>Hello world</p>`
 // console.log(web)
 
-const re = /<[^>]+>/gi
+const re = /(<!--.*-->)|(<[^>]+>)/gi
 let re_result
 let output = ''
 let start = -1
@@ -14,15 +14,16 @@ while ((re_result = re.exec(web)) !== null) {
   end = re_result.index
   // console.log(re_result.index)
   // console.log(re_result[0].length)
-  output += re_result[0]
   if (start > 0) {
     for (let i = 0; i < end - start; i++) {
       output += '1'
     }
   }
+  output += re_result[0]
   start = re_result.index + re_result[0].length
 }
-console.log(output)
+// fs.writeFileSync('./aa11.html',output)
+// console.log(output)
 
 const dom = new JSDOM(web, { includeNodeLocations: true })
 // let ele = dom.window.document.querySelector('p')
@@ -40,8 +41,8 @@ const dom = new JSDOM(web, { includeNodeLocations: true })
 //     offset.endOffset - (offset.endTag.endOffset - offset.endTag.startOffset),
 //   ),
 // )
-const document = dom.window.document
-var result = document.evaluate(
+let document = dom.window.document
+let result = document.evaluate(
   '//div[@class="js-yearly-contributions"]/div[@class="position-relative"]/h2',
   document,
   null,
@@ -54,5 +55,23 @@ while (node) {
   nodes.push(node)
   console.log(node.innerHTML)
   console.log(dom.nodeLocation(node))
+  node = result.iterateNext()
+}
+
+const dom1 = new JSDOM(output, { includeNodeLocations: true })
+
+document = dom1.window.document
+result = document.evaluate(
+  '//div[@class="js-yearly-contributions"]/div[@class="position-relative"]/h2',
+  document,
+  null,
+  dom1.window.XPathResult.ANY_TYPE,
+  null,
+)
+node = result.iterateNext()
+while (node) {
+  nodes.push(node)
+  console.log(node.innerHTML)
+  console.log(dom1.nodeLocation(node))
   node = result.iterateNext()
 }
